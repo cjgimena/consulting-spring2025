@@ -26,11 +26,11 @@ def create_combined():
                                     df['__source_file__'] = file  # Optional: source file column
                                     combined_sheets[sheet].append(df)
                                 else:
-                                    #print(f"Sheet {sheet} in {file} is empty")  # Debugging
+                                    print(f"Sheet {sheet} in {file} is empty")  # Debugging
                             else:
-                                #print(f"Sheet {sheet} missing in {file}")  # Debugging
+                                print(f"Sheet {sheet} missing in {file}")  # Debugging
                     except Exception as e:
-                        #print(f"⚠️ Error with {file_path}: {e}")
+                        print(f"⚠️ Error with {file_path}: {e}")
 
             # Filter out empty lists for each sheet
             sheets_to_write = {
@@ -49,19 +49,22 @@ def create_combined():
             else:
                 print(f"⚠️ No valid data found for {player}, skipping combined.xlsx")
 
-import pandas as pd
+
+create_combined()
+
+# import pandas as pd
 
 
-# Path to the Excel file
-file_path = "combined.xlsx"
+# # Path to the Excel file
+# file_path = "combined.xlsx"
 
-# Read all sheets into a dict of DataFrames
-df_dict = pd.read_excel(file_path, sheet_name=None)
+# # Read all sheets into a dict of DataFrames
+# df_dict = pd.read_excel(file_path, sheet_name=None)
 
-# Access each sheet like this:
-settings_df = df_dict.get("settings")
-shots_df = df_dict.get("shots")
-points_df = df_dict.get("points")
-games_df = df_dict.get("games")
-sets_df = df_dict.get("sets")
-stats_df = df_dict.get("stats")
+# # Access each sheet like this:
+# settings_df = df_dict.get("settings")
+# shots_df = df_dict.get("shots")
+# points_df = df_dict.get("points")
+# games_df = df_dict.get("games")
+# sets_df = df_dict.get("sets")
+# stats_df = df_dict.get("stats")
