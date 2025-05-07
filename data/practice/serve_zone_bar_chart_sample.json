@@ -1,0 +1,34 @@
+{
+    "serves": [
+        {
+            "type": "First Serve",
+            "sides": {
+                "deuce": {
+                    "wide": 20,
+                    "body": 30,
+                    "t": 50
+                },
+                "ad": {
+                    "wide": 10,
+                    "body": 20,
+                    "t": 10
+                }
+            }
+        },
+        {
+            "type": "Second Serve",
+            "sides": {
+                "deuce": {
+                    "wide": 20,
+                    "body": 30,
+                    "t": 50
+                },
+                "ad": {
+                    "wide": 10,
+                    "body": 20,
+                    "t": 10
+                }
+            }
+        }
+    ]
+}
