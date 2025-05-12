@@ -1,0 +1,17 @@
+{
+    "serves": [
+        {
+            "type": "First Serve",
+            "total": 100,
+            "in": 80,
+            "won": 40
+        },
+        {
+            "type": "Second Serve",
+            "total": 50,
+            "in": 30,
+            "won": 10
+        }
+
+    ]
+}
