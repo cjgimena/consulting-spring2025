@@ -4,6 +4,10 @@ import pandas as pd
 base_path = "data/mens"
 target_sheets = ["Settings", "Shots", "Points", "Games", "Sets", "Stats"]
 def create_combined():
+    """
+        For each player in data/mens, creates a combined .xlsx of all their matches.
+        Prints in terminal which matches + tabs have been analyzed.
+    """
     for player in os.listdir(base_path):
         player_folder = os.path.join(base_path, player)
         if os.path.isdir(player_folder):
@@ -12,12 +16,13 @@ def create_combined():
             # Collect data from each file
             for file in os.listdir(player_folder):
                 file_path = os.path.join(player_folder, file)
-
+                missing = []
+                combined = []
+                empty = []
                 if file.endswith(".xlsx") and file != "combined.xlsx":
                     try:
                         print(f"Reading {file_path}...")  # Debugging
                         xls = pd.read_excel(file_path, sheet_name=None)
-
                         for sheet in target_sheets:
                             if sheet in xls:
                                 df = xls[sheet]
@@ -25,12 +30,19 @@ def create_combined():
                                     #print(f"Adding data from {file} - {sheet}")  # Debugging
                                     df['__source_file__'] = file  # Optional: source file column
                                     combined_sheets[sheet].append(df)
+                                    combined.append(sheet)
                                 else:
-                                    print(f"Sheet {sheet} in {file} is empty")  # Debugging
+                                    empty.append(sheet)
+                                    #print(f"Sheet {sheet} in {file} is empty")  # Debugging
                             else:
-                                print(f"Sheet {sheet} missing in {file}")  # Debugging
+                                missing.append(sheet)
+                                #print(f"Sheet {sheet} missing in {file}")  # Debugging
                     except Exception as e:
                         print(f"⚠️ Error with {file_path}: {e}")
+                    print('------------------------------------------------------------------------')
+                    print(f'Successfully accessed {file}')
+                    print(f'Missing: {missing}, Empty: {empty}, Combined: {combined}')
+                    print('------------------------------------------------------------------------')
 
             # Filter out empty lists for each sheet
             sheets_to_write = {
@@ -51,20 +63,3 @@ def create_combined():
 
 
 create_combined()
-
-# import pandas as pd
-
-
-# # Path to the Excel file
-# file_path = "combined.xlsx"
-
-# # Read all sheets into a dict of DataFrames
-# df_dict = pd.read_excel(file_path, sheet_name=None)
-
-# # Access each sheet like this:
-# settings_df = df_dict.get("settings")
-# shots_df = df_dict.get("shots")
-# points_df = df_dict.get("points")
-# games_df = df_dict.get("games")
-# sets_df = df_dict.get("sets")
-# stats_df = df_dict.get("stats")
