@@ -1,6 +1,6 @@
 import pandas as pd
 
-file_path = '/Users/cjgimena/Desktop/github/consulting-spring2025/data/mens/mens_results.csv'
+file_path = '/Users/joshuajpark/Desktop/tc/consulting-spring2025/data/mens/mens_results.csv'
 matches = pd.read_csv(file_path).drop_duplicates()
 matches['Date'] = pd.to_datetime(matches['Date'])
 
@@ -66,6 +66,4 @@ def get_player_record_table(player_name):
         'Conference Record': f"{conf_wins}-{conf_losses}"
     }])
 
-print(get_player_record_table('Rudy Quan'))
-
-
+get_player_record_table('Rudy Quan')
