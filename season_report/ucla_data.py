@@ -9,12 +9,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("team", help="M or W")
 args = parser.parse_args()
 TEAM = args.team
-    """_summary_ 
-    To use, type either "python ucla_data.py m" or "python ucla_data.py w" to generate the tennis_matches_data.csv 's 
-    that are located in the mens / womens folders!
-    
-    If you need an explanation on what any of the columns mean, look through the api links below!
-    """
+"""_summary_ 
+To use, type either "python ucla_data.py m" or "python ucla_data.py w" to generate the tennis_matches_data.csv 's 
+that are located in the mens / womens folders!
+
+If you need an explanation on what any of the columns mean, look through the api links below!
+"""
 if TEAM.lower() == 'w':
     api_url = "https://uclabruins.com/api/v2/EventsResults/results?sportId=21&$pageIndex=0&$pageSize=50"
     OUT_LINK = r'C:\Users\pavan\Documents\Programming Stuff\Tennis_Consult\consulting-spring2025\data\womens\tennis_matches_data.csv'
