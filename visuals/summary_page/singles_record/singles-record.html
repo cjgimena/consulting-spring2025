@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -123,6 +123,154 @@
 
                     const a = document.createElement("a");
                     a.download = `${label.replace(/\s+/g, "_")}.png`;
+                    a.href = png;
+                    a.click();
+                };
+
+                img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgString)));
+            }
+        });
+    </script>
+
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Donut Charts - Singles Record</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f5f5f5;
+            font-family: sans-serif;
+        }
+
+        .chart-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 6px 12px;
+            border: none;
+            background-color: #444;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chart-container" id="charts"></div>
+
+    <script>
+        d3.json("singles_record_sample.json").then(function (data) {
+            const records = [
+                {
+                    label: "Overall Record",
+                    data: data.records.find(d => d.type === "Overall Record"),
+                    color: "#F2A900"
+                },
+                {
+                    label: "Conference Record",
+                    data: data.records.find(d => d.type === "Conference Record"),
+                    color: "#2C61AB"
+                }
+            ];
+
+            const size = 140;
+            const radius = 50;
+
+            records.forEach((chart, index) => {
+                const winPercentage = chart.data.won / chart.data.total;
+
+                const wrapper = d3.select("#charts")
+                    .append("div")
+                    .attr("class", "chart-wrapper");
+
+                const svg = wrapper.append("svg")
+                    .attr("id", `chart-${index}`)
+                    .attr("xmlns", "http://www.w3.org/2000/svg")
+                    .attr("width", size)
+                    .attr("height", size);
+
+                const group = svg.append("g")
+                    .attr("transform", `translate(${size / 2}, ${size / 2})`);
+
+                // Background arc
+                group.append("path")
+                    .attr("d", d3.arc()
+                        .innerRadius(radius)
+                        .outerRadius(radius + 16)
+                        .startAngle(0)
+                        .endAngle(2 * Math.PI))
+                    .attr("fill", "#DEDEDE");
+
+                // Foreground arc (won portion)
+                group.append("path")
+                    .attr("d", d3.arc()
+                        .innerRadius(radius)
+                        .outerRadius(radius + 16)
+                        .startAngle(0)
+                        .endAngle(2 * Math.PI * winPercentage)
+                        .cornerRadius(10))
+                    .attr("fill", chart.color);
+
+                // Label
+                wrapper.append("div")
+                    .text(chart.label)
+                    .style("margin-top", "5px");
+
+                // Download button
+                wrapper.append("button")
+                    .text("Download PNG")
+                    .on("click", () =>
+                        exportSvgToPng(`chart-${index}`, chart.label.replace(/\s+/g, "_"))
+                    );
+            });
+
+            function exportSvgToPng(svgId, label) {
+                const svgElement = document.getElementById(svgId);
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svgElement);
+
+                const width = svgElement.width.baseVal.value;
+                const height = svgElement.height.baseVal.value;
+                const scale = 5;
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width * scale;
+                canvas.height = height * scale;
+
+                const ctx = canvas.getContext("2d");
+                ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+
+                img.onload = function () {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    const png = canvas.toDataURL("image/png");
+
+                    const a = document.createElement("a");
+                    a.download = `${label}.png`;
                     a.href = png;
                     a.click();
                 };
