@@ -49,9 +49,9 @@ def position(loc):
 
     
 loc = r'C:\Users\pavan\Documents\Programming Stuff\Tennis_Consult\consulting-spring2025\data\womens\tennis_matches_data.csv'
-#print(out_clinch(loc))
+print(out_clinch(loc))
 
-#print(clinch_comp(loc))
+print(clinch_comp(loc))
 
 t = position(loc)
 print(t[0])
