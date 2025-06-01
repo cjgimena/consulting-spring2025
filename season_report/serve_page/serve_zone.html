@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Serve Placement Grid</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f5f5f5;
+      font-family: sans-serif;
+    }
+
+    .chart-container {
+      display: flex;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .chart-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      border: none;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .exclude-export {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chart-container" id="charts"></div>
+
+  <script>
+    d3.json("../data/serve_zone_bar_chart_sample.json").then(function (data) {
+      const boxWidth = 300;
+      const boxHeight = 250;
+      const blockHeight = 80;
+      const blockSpacing = 1;
+      const topMargin = 100;
+      const padding = 20;
+
+      const colors = ["#052B4F", "#0A4D7E", "#3583C4"];
+
+      function normalizeSide(side) {
+        const values = [side.t, side.body, side.wide];
+        const total = d3.sum(values);
+        return values.map(v => Math.round((v / total) * 100));
+      }
+
+      const charts = ["First Serve", "Second Serve"].map((label, i) => {
+        const serve = data.serves.find(d => d.type === label);
+        return {
+          label: label,
+          id: `chart-${i}`,
+          ad: normalizeSide(serve.sides.ad),
+          deuce: normalizeSide(serve.sides.deuce)
+        };
+      });
+
+      charts.forEach((chart, i) => {
+        const wrapper = d3.select("#charts")
+          .append("div")
+          .attr("class", "chart-wrapper");
+
+        const svg = wrapper.append("svg")
+          .attr("id", chart.id)
+          .attr("xmlns", "http://www.w3.org/2000/svg")
+          .attr("width", boxWidth + padding * 2)
+          .attr("height", boxHeight)
+          .style("background", "#f5f5f5");
+
+        const g = svg.append("g");
+
+        const baseX = padding;
+        const baseY = 0;
+
+        wrapper.append("div")
+          .text(chart.label)
+          .style("margin-top", "5px")
+          .style("font-size", "18px")
+          .style("font-weight", "bold")
+          .style("text-align", "center");
+
+
+        const rowData = [chart.ad, chart.deuce];
+
+        const maxRowWidth = 240;
+
+        rowData.forEach((values, rowIndex) => {
+          const y = baseY + 30 + rowIndex * (blockHeight + 30);
+          const totalWidth = d3.sum(values.map(v => (v / 100) * maxRowWidth)) + (values.length - 1) * blockSpacing;
+          let x = baseX + (boxWidth - totalWidth) / 2;
+
+          values.forEach((val, j) => {
+            const proportionalWidth = (val / 100) * maxRowWidth;
+
+            g.append("rect")
+              .attr("x", x)
+              .attr("y", y)
+              .attr("width", proportionalWidth)
+              .attr("height", blockHeight)
+              .attr("rx", 8)
+              .attr("ry", 8)
+              .attr("fill", colors[j]);
+
+            /// REMOVE THIS LINE FOR NO TEXT
+            g.append("text")
+              .attr("x", x + proportionalWidth / 2)
+              .attr("y", y + blockHeight / 2 + 5)
+              .attr("text-anchor", "middle")
+              .attr("fill", "white")
+              .attr("font-size", "16px")
+              .text(`${val}%`);
+
+            x += proportionalWidth + blockSpacing;
+          });
+        });
+
+        wrapper.append("button")
+          .text("Download PNG")
+          .on("click", () => exportSvgToPng(chart.id, chart.label));
+      });
+
+      function exportSvgToPng(svgId, label) {
+        const svgElement = document.getElementById(svgId);
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgElement);
+
+        const scale = 10;
+        const width = svgElement.width.baseVal.value;
+        const height = svgElement.height.baseVal.value;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0);
+          const png = canvas.toDataURL("image/png");
+
+          const a = document.createElement("a");
+          a.download = `${label.replace(/\s+/g, "_")}_serve_box.png`;
+          a.href = png;
+          a.click();
+        };
+
+        img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgString)));
+      }
+    });
+  </script>
+</body>
+
+</html>
