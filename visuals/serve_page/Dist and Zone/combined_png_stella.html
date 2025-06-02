@@ -172,7 +172,7 @@
                     .attr("x2", d => xScale(d.x2))
                     .attr("y2", d => yScale(d.y2))
                     .attr("stroke", "white")
-                    .attr("stroke-width", d => d.width ? d.width : 4);
+                    .attr("stroke-width", d => d.width ? d.width - 4: 3);
 
                 const dashedLines = [
                     { x: 52.5, y1: 245, y2: 0 },
