@@ -35,7 +35,7 @@
 </body>
 
 <script>
-Promise.all([d3.json("../data/serve_place.json"), d3.json("../data/serve_place_labels.json")]).then(function([serves_ucla, labels]) {
+Promise.all([d3.json("../data/second_serve_place.json"), d3.json("../data/second_serve_place_labels.json")]).then(function([serves_ucla, labels]) {
     const svg = d3.select("svg");
     const width = +svg.attr("width");
     const height = +svg.attr("height");
