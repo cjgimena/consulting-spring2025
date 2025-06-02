@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serve Placement</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/save-svg-as-png/1.4.17/saveSvgAsPng.min.js"></script>
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #86ac91;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Clash Display', sans-serif;
+        }
+        .svg-container {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            aspect-ratio: 4 / 3;
+            font-family: 'Clash Display', sans-serif;
+        }
+
+        svg {
+            width: 60%;
+            height: 90%;
+            display: block;
+            font-family: 'Clash Display', sans-serif;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            fill: white;
+            text-anchor: middle;
+        }
+
+        .dashed-line {
+            stroke: white;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+    </style>
+</head>
+<body style="background-color: #ffffff;">
+    <button onclick="downloadSVG()" style="position: absolute; top: 20px; right: 20px; padding: 10px 15px; font-size: 14px;">Download Screenshot</button>
+
+    <svg width="1000" height="800"></svg>
+    
+
+
+</body>
+</html>
+
+
+    <script>
+        d3.json("serve_place.json").then(function(serves_ucla) {
+            d3.json("serve_place_labels.json").then(function(labels) {
+
+                const svg = d3.select("svg");
+                const width = +svg.attr("width");
+                const height = +svg.attr("height");
+
+                const xScale = d3.scaleLinear()
+                                 .domain([-350, 350])
+                                 .range([0, width]);
+
+                const yScale = d3.scaleLinear()
+                                 .domain([-150, 600])
+                                 .range([height, 0]);
+                
+
+                svg.append("rect")
+                    .attr("x", xScale(-210))
+                    .attr("y", yScale(455))
+                    .attr("width", xScale(210) - xScale(-210))
+                    .attr("height", yScale(-25) - yScale(455))
+                    .attr("fill", "#6092ce");
+
+
+                const courtLines = [
+                    { x1: 210, y1: -25, x2: 210, y2: 455 },
+                    { x1: -210, y1: -25, x2: -210, y2: 455 },
+                    { x1: 157.5, y1: -25, x2: 157.5, y2: 455 },
+                    { x1: -157.5, y1: -25, x2: -157.5, y2: 455 },
+                    { x1: 240, y1: 0, x2: -240, y2: 0, width: 7 },
+                    { x1: 0, y1: -25, x2: 0, y2: 245 },
+                    { x1: 157.5, y1: 245, x2: -157.5, y2: 245 },
+                    { x1: 211.25, y1: 455, x2: -211.25, y2: 455 },
+                    { x1: 0, y1: 445, x2: 0, y2: 455 }
+                ];
+
+                // Define serve zones & color by % serves
+
+                const zones = {
+                    "Deuce Wide": { x: -155.5, width: 51.5, label: "Wide", side: "Deuce" },
+                    "Deuce Body": { x: -104, width: 51.5, label: "Body", side: "Deuce" },
+                    "Deuce T": { x: -52.5, width: 50.5, label: "T", side: "Deuce" },
+                    "Ad T": { x: 2, width: 50.5, label: "T", side: "Ad" },
+                    "Ad Body": { x: 52.5, width: 51.5, label: "Body", side: "Ad" },
+                    "Ad Wide": { x: 104, width: 51.5, label: "Wide", side: "Ad" }
+                };
+
+                const sideServeCounts = { "Ad": 0, "Deuce": 0 };
+
+                let maxPercent = -Infinity;
+                let minPercent = Infinity;
+
+                labels.forEach(function(d) {
+                    const proportion = d.proportion * 100;
+                    maxPercent = Math.max(maxPercent, proportion);
+                    minPercent = Math.min(minPercent, proportion);
+                });
+
+                labels.forEach(d => {
+                    sideServeCounts[d.side] += d.count;
+                });
+
+                labels.forEach(function(d) {
+                    const zoneKey = `${d.side} ${d.serveInPlacement}`;
+                    const zone = zones[zoneKey];
+                    if (!zone) return;
+
+                    const winPercent = d.proportion;
+                    const totalShots = `(${d.count} shots)`;
+
+                    const fillRectColor = d.count / sideServeCounts[d.side] >= 0.4 ? "#16537E" : "#6FA8DC";
+                    const fillColor = winPercent === Math.round(maxPercent)
+                        ? "#32a852"
+                        : winPercent === Math.round(minPercent)
+                            ? "red"
+                            : "black";
+
+                    // Background Rect
+                    svg.append("rect")
+                        .attr("x", xScale(zone.x))
+                        .attr("y", yScale(242))
+                        .attr("width", xScale(zone.x + zone.width) - xScale(zone.x))
+                        .attr("height", 253.5)
+                        .attr("fill", fillRectColor)
+                        .attr("stroke-width", 0);
+                });
+
+
+                // Border Line
+                svg.selectAll(".court-outline")
+                    .data(courtLines)
+                    .enter()
+                    .append("line")
+                    .attr("class", "court-outline")
+                    .attr("x1", d => xScale(d.x1))
+                    .attr("y1", d => yScale(d.y1))
+                    .attr("x2", d => xScale(d.x2))
+                    .attr("y2", d => yScale(d.y2))
+                    // .attr("stroke", "black")
+                    .attr("stroke-width", d => d.width ? d.width + 2 : 6)
+                    .attr("opacity", 0.5);
+
+                // Court Lines (white)
+                svg.selectAll(".court-line")
+                    .data(courtLines)
+                    .enter()
+                    .append("line")
+                    .attr("class", "court-line")
+                    .attr("x1", d => xScale(d.x1))
+                    .attr("y1", d => yScale(d.y1))
+                    .attr("x2", d => xScale(d.x2))
+                    .attr("y2", d => yScale(d.y2))
+                    .attr("stroke", "white")
+                    .attr("stroke-width", d => d.width ? d.width - 4: 3);
+
+                const dashedLines = [
+                    { x: 52.5, y1: 245, y2: 0 },
+                    { x: 105, y1: 245, y2: 0 },
+                    { x: -52.5, y1: 245, y2: 0 },
+                    { x: -105, y1: 245, y2: 0 }
+                ];
+
+                svg.selectAll(".dashed-line")
+                   .data(dashedLines)
+                   .enter()
+                   .append("line")
+                   .attr("x1", function(d) { return xScale(d.x); })
+                   .attr("y1", function(d) { return yScale(d.y1); })
+                   .attr("x2", function(d) { return xScale(d.x); })
+                   .attr("y2", function(d) { return yScale(d.y2); })
+                   .attr("class", "dashed-line");
+
+
+
+                // Add Serve Points
+                svg.selectAll("circle")
+                    .data(serves_ucla.filter(d => d.serveOutcome !== "Ace"))
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function(d) { return xScale(d.x); })
+                    .attr("cy", function(d) { return yScale(d.y); })
+                    .attr("r", 5)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 0.1)
+                    .attr("fill", function(d) {
+                        if (d.serveOutcome === "Won") {
+                            return "#00cc00";
+                        } else if (d.serveOutcome === "Lost") {
+                            return "red";
+                        }
+                    });
+
+                    
+                // Add Aces
+                svg.selectAll(".star")
+                    .data(serves_ucla.filter(d => d.serveOutcome === "Ace"))
+                    .enter()
+                    .append("polygon")
+                    .attr("points", function(d) {
+                        const cx = xScale(d.x);
+                        const cy = yScale(d.y);
+                        const outerRadius = 7;
+                        const innerRadius = 3.5;
+                        let starPoints = "";
+                        for (let i = 0; i < 10; i++) {
+                            const angle = i * Math.PI / 5 - Math.PI / 2;
+                            const r = i % 2 === 0 ? outerRadius : innerRadius;
+                            const x = cx + r * Math.cos(angle);
+                            const y = cy + r * Math.sin(angle);
+                            starPoints += `${x},${y} `;
+                        }
+                        return starPoints.trim();
+                    })
+                    .attr("fill", "#f8c84f")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 0.1);
+
+                // Create drop Shadow attribute
+                const defs = svg.append("defs");
+
+                const filter = defs.append("filter")
+                    .attr("id", "drop-shadow")
+                    .attr("height", "130%");
+
+                filter.append("feDropShadow")
+                    .attr("dx", 2)
+                    .attr("dy", 2)
+                    .attr("stdDeviation", 2)
+                    .attr("flood-color", "#000")
+                    .attr("flood-opacity", 0.4);
+                
+
+                // Labels
+                
+                // Create box for zone & count 
+                svg.selectAll(".count-rect")
+                   .data(labels)
+                   .enter()
+                   .append("rect")
+                   .attr("class", "count-rect")
+                   .attr("x", function(d) { return xScale(d.x) - 32; })
+                   .attr("y", yScale(312))
+                   .attr("width", 64)
+                   .attr("height", 52)
+                   .attr("rx", 12)
+                   .attr("ry", 12)
+                   .attr("fill", function(d) {
+                       const fillRectColor = d.count / sideServeCounts[d.side] >= 0.4 ? "#16537E" : "#6FA8DC";
+                       return fillRectColor;
+                   })
+                   .attr("filter", "url(#drop-shadow)");
+
+                // Add "Count" labels
+                svg.selectAll(".count-label")
+                   .data(labels)
+                   .enter()
+                   .append("text")
+                   .attr("class", "count-label")
+                   .attr("x", function(d) { return xScale(d.x); })
+                   .attr("y", yScale(272))
+                   .attr("text-anchor", "middle")
+                   .attr("fill", "white")
+                   .style("font-size", "14.5px")
+                   .text(function(d) { return `${d.count_label}`; });
+
+                // Add bottom "Win %" labels
+                svg.selectAll(".proportion-label")
+                   .data(labels)
+                   .enter()
+                   .append("text")
+                   .attr("class", "proportion-label")
+                   .attr("x", function(d) { return xScale(d.x); })
+                   .attr("y", yScale(15))
+                   .attr("text-anchor", "middle")
+                   .attr("fill", "white")
+                   .style("font-size", "15px")
+                   .text(function(d) { return d.proportion_label; });
+                
+                // Define label names
+                const servePlacementLabels = [
+                    { label: "T", x: 26.25, y: 294 },
+                    { label: "T", x: -26.25, y: 294 },
+                    { label: "BODY", x: 78.75, y: 294 },
+                    { label: "BODY", x: -78.75, y: 294 },
+                    { label: "WIDE", x: 131.25, y: 294 },
+                    { label: "WIDE", x: -131.25, y: 294 },
+                    { label: "ZONE", x: -181.25, y: 294 },
+                    { label: "COUNT", x: -181.25, y: 272 },
+                    { label: "WIN %", x: -181.25, y: 15 }
+                ];
+
+                servePlacementLabels.forEach(function(d) {
+                    svg.append("text")
+                    .attr("class", "label")
+                    .attr("x", xScale(d.x))
+                    .attr("y", yScale(d.y))
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .style("font-size", "14px")
+                    .text(d.label);
+                });
+
+                });
+            });
+    </script>
+
+    <script>
+        function downloadSVG() {
+            const svgElement = document.querySelector("svg");
+            saveSvgAsPng(svgElement, "serve_placement.png", { backgroundColor: "#ffffff" });
+        }
+    </script>
