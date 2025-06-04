@@ -53,7 +53,7 @@
         const fullBarWidth = 414;
         const barHeight = 12;
 
-        d3.json("ratings.json").then(data => {
+        d3.json("../data/ratings.json").then(data => {
             const wrapper = d3.select("#bars-wrapper");
 
             data.ratings.forEach((d, i) => {
