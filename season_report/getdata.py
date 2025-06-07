@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-base_path = "data/mens"
+base_path = "../data/mens"
 target_sheets = ["Settings", "Shots", "Points", "Games", "Sets", "Stats"]
 def create_combined():
     """
