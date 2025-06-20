@@ -1,0 +1,20 @@
+{
+    "returns": [
+        {
+            "side": "Deuce",
+            "directions": {
+                "crosscourt": 39,
+                "middle": 275,
+                "down the line": 29
+            }
+        },
+        {
+            "side": "Ad",
+            "directions": {
+                "crosscourt": 41,
+                "middle": 232,
+                "down the line": 41
+            }
+        }
+    ]
+}
